@@ -1,0 +1,24 @@
+# About this project: goals and intent
+
+I use [[https://ox-hugo.scripter.co/][ox-hugo]] in combination with [[https://gohugo.io/][Hugo]] to write content for my websites. This combination has been serving me well, but there were some pain points, mostly related to me wanting to support a workflow for unpublished drafts.
+
+I like publishing in progress pages for [[https://www.steventammen.com/about/#publishing-in-progress-pages][various reasons]], but sometimes pages really aren't ready even for that. Maybe I'm thinking about how to phrase things that might potentially be interpreted the wrong way (as is often the case in sensitive or controversial matters). Maybe I don't feel comfortable publishing even my roughest thoughts on something because I know that my positions are likely to change since I haven't done very much research yet (and I don't want to mislead people, even for a short time). And so on.
+
+Why not just use the =draft= [[https://gohugo.io/variables/page/][page variable]] in Hugo? It supports not publishing drafts until the draft flag is removed. It's a fair question. The thing is, pages making use of the =draft= page variable are still tracked with git, so are 100% visible to the world under version control. For many uses this may be sufficient, but in my opinion, drafts are not really drafts if they are fully visible to the world.
+
+So I decided that I wanted a way to be able to use my  =.gitignore= file to ignore  =drafts/= directories so that my drafts are truly invisible to the world. While this sounds simple enough, there is a lot of moving Org files around (and corresponding static content as necessary) to go from a draft to an Org file that will get published with Hugo. I wanted to automate this, and thus this project was born. 
+
+This project's goal is to allow for the use of "true" draft pages in a straight-forward, no-nonsense way, via the command line.
+
+# Using this project as a dotfiles submodule
+
+If you have a dotfiles repository, you might consider using this project as a submodule. This is what I do with [[https://github.com/StevenTammen/dotfiles][my dotfiles]]. Submodules are a bit complicated, and I recommend reading [[https://chrisjean.com/git-submodules-adding-using-removing-and-updating/][this tutorial]] if you've never used them or are a bit rusty.
+
+Here's what this looked like for me:
+
+BEGIN_SRC bash
+git submodule add git@github.com:StevenTammen/ox-hugo-publish.git ox-hugo-publish
+chmod -R 755 ox-hugo-publish/
+END_SRC
+
+You'll want to give the shell scripts execute permissions. You'll also want to add the executables to your path in your shell configuration file (e.g., .bashrc, init.fish, etc.).

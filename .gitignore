@@ -1,0 +1,9 @@
+# Ignore everything (including however many custom archetypes)
+*
+
+# But not the files that will be applicable to everyone
+!.gitignore
+!makefile
+!ndraft
+!npost
+!README.org
