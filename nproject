@@ -65,11 +65,12 @@ rm content/projects/$1.org org/drafts/$fname.org content/drafts/$fname.md
 
 
 # if the draft had static assets (e.g., images), move them into an asset directory 
-# corresponding to the newly created webpage
+# corresponding to the newly created webpage, and update links in the document.
 if [ -d "static/drafts/$fname/" ]; then
   staticpath="static/projects/$path/"
   mkdir -p "$staticpath"
   mv static/drafts/$fname/ static/projects/$1/
+  sed -i "s|static/drafts/$fname/|static/projects/$1/|g" org/projects/$1.org
 fi
 
 
