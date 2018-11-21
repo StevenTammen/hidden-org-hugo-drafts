@@ -12,7 +12,7 @@ This project's goal is to allow for the use of "true" draft pages in a straight-
 
 * How to set up this project for your site
 
-** 1. Add the drafts archetype to your =archetypes/= folder
+** 1. Add the drafts archetype to your =archetypes/= directory
 
 This project uses a drafts archetype, located in the file =drafts.org=. You should put this in your site's =archetypes/= directory.
 
@@ -127,11 +127,15 @@ I have not tested the Unix-like version of this project, but see no reason why i
 
 If you have a dotfiles repository, you might consider using this project as a submodule. This is what I do with [[https://github.com/StevenTammen/dotfiles][my dotfiles]]. Submodules are a bit complicated, and I recommend reading [[https://chrisjean.com/git-submodules-adding-using-removing-and-updating/][this tutorial]] if you've never used them or are a bit rusty.
 
-Here's what this looked like for me:
+Here's what this looked like for me (use the =unix-like= directory if you are not on windows):
 
 #+BEGIN_SRC bash
-git submodule add git@github.com:StevenTammen/ox-hugo-publish.git ox-hugo-publish
-chmod -R 755 ox-hugo-publish/
+cd ~/dotfiles
+git submodule add git@github.com:StevenTammen/ox-hugo-publish.git bin/ox-hugo-publish
+cd bin/ox-hugo-publish/windows
+make
+cd -
+chmod -R 755 bin/ox-hugo-publish/windows
 #+END_SRC
 
 You'll want to give the shell scripts execute permissions. You'll also want to add the executables to your path in your shell configuration file (e.g., .bashrc, init.fish, etc.).
