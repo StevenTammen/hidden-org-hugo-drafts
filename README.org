@@ -14,7 +14,7 @@ This project's goal is to allow for the use of "true" draft pages in a straight-
 
 ** 1. Add the drafts archetype to your =archetypes/= folder
 
-This project uses as drafts archetype, located in the file =drafts.org=. You should put this in your site's =archetypes/= directory.
+This project uses a drafts archetype, located in the file =drafts.org=. You should put this in your site's =archetypes/= directory.
 
 ** 2. Construct an appropriate site-level =.gitignore= file for your directory structure
 
