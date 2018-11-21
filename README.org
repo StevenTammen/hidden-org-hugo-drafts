@@ -1,4 +1,4 @@
-# About this project: goals and intent
+* About this project: goals and intent
 
 I use [[https://ox-hugo.scripter.co/][ox-hugo]] in combination with [[https://gohugo.io/][Hugo]] to write content for my websites. This combination has been serving me well, but there were some pain points, mostly related to me wanting to support a workflow for unpublished drafts.
 
@@ -6,19 +6,132 @@ I like publishing in progress pages for [[https://www.steventammen.com/about/#pu
 
 Why not just use the =draft= [[https://gohugo.io/variables/page/][page variable]] in Hugo? It supports not publishing drafts until the draft flag is removed. It's a fair question. The thing is, pages making use of the =draft= page variable are still tracked with git, so are 100% visible to the world under version control. For many uses this may be sufficient, but in my opinion, drafts are not really drafts if they are fully visible to the world.
 
-So I decided that I wanted a way to be able to use my  =.gitignore= file to ignore  =drafts/= directories so that my drafts are truly invisible to the world. While this sounds simple enough, there is a lot of moving Org files around (and corresponding static content as necessary) to go from a draft to an Org file that will get published with Hugo. I wanted to automate this, and thus this project was born. 
+So I decided that I wanted a way to be able to use my  =.gitignore= file to ignore  =drafts/= directories so that my drafts are truly invisible to the world (and not in my GitHub repository). While this sounds simple enough, there is a lot of moving Org files around (and corresponding static content as necessary) to go from a draft to an Org file that will get published with Hugo. I wanted to automate this, and thus this project was born. 
 
 This project's goal is to allow for the use of "true" draft pages in a straight-forward, no-nonsense way, via the command line.
 
-# Using this project as a dotfiles submodule
+* How to set up this project for your site
+
+** 1. Add the drafts archetype to your =archetypes/= folder
+
+This project uses as drafts archetype, located in the file =drafts.org=. You should put this in your site's =archetypes/= directory.
+
+** 2. Construct an appropriate site-level =.gitignore= file for your directory structure
+
+If you are using an ox-hugo -> Hugo workflow, you will have a directory for writing your Org files in, a directory that Markdown gets exported to (the one that Hugo builds from), and a static directory. For example, here is what the base directory looks like for one of my websites:
+
+#+BEGIN_SRC bash
+./   archetypes/   content/         .git/        .gitmodules  netlify.toml  README.org  themes/
+../  config.toml  .dir-locals.el  .gitignore  layouts/      org/           static/
+#+END_SRC
+
+My Org files are in =org/=, the Markdown is in =content/=, and the static directory is =static/=.
+
+To ignore drafts from the drafts archetype, the =.gitignore= file above for me looks like the following:
+
+#+BEGIN_SRC
+# Ignore draft pages not ready for public view
+org/drafts/
+content/drafts/
+static/drafts/
+#+END_SRC
+
+You will want to do something similar, according to how your directories are set up.
+
+** 3. Modify =ndraft=  and =npost= to match your directory structure
+
+This project comes with only two scripts initially: =ndraft= and =npost=. Both of these are constructed according to my projects' structure, so you will probably need to tweak them a little bit by updating the paths to correspond to your Org source directory.
+
+For example, you will want to change =org/drafts/$1.org= to =your-org-dir/drafts/$1.org= in =ndraft=, where =your-org-dir= is your Org source directory for ox-hugo.
+
+** 4. Build the publishing scripts from your Hugo archetypes and =npost=
+
+Different people name their Hugo archetypes different things, so I thought it was better to support a makefile approach rather than trying to come up with many different possibilities. I thought =posts= was probably the most common archetype, however, so that is the archetype I used for the base script that generates the others.
+
+The makefile that ships with the project sets up additional publishing scripts for the other archetypes I use: =pages= (for static pages), =links= (for collections of links), and =projects= (for personal projects). You should customize the makefile according to what archetypes you use on your site. It should be pretty straightforward to do this.
+
+After running =make=, I end up with publishing scripts called =npost=, =npage=, =nlinks=, and =nproject= that let me supply the file name of a draft (the full path and an extension are unnecessary), and then publish the draft to the appropriate archetype folders.
+
+* How to use this project
+
+At the moment, this project assumes correct use, or it may break things. This is to say, it does not do checks that files or directories exist, so if you run one of the scripts without proper preconditions, it may partially execute and leave your project with orphaned files that you have to go find and delete (or move back to where they were before execution, etc.). In the future I hope to make the scripts more robust (so as to avoid such things), but everything works fine as long as you only use the scripts in the intended way.
+
+** 1. Create a new draft with =ndraft=
+
+*In the base directory of your site* execute the =ndraft= command. For example:
+
+#+BEGIN_SRC bash
+cd ~/sites/mysite.com
+ndraft test-the-project
+#+END_SRC
+
+If things are configured properly, this will create the file at, e.g., =~/sites/mysite.com/org/drafts/test-the-project.org=, and open it in Emacs.
+
+** 2. Write your content, linking to static files if necessary
+
+If your draft contains links to static resources (like images), you should create a directory for your draft's static resources (that also won't be tracked with git), and put the resources in it:
+
+#+BEGIN_SRC bash
+cd ~/sites/mysite.com
+mkdir -p static/drafts/test-the-project
+mv /path/to/image.jpg static/drafts/test-the-project
+#+END_SRC
+
+Within your Org file, you can then link to the static resource (e.g., with the path =file:/drafts/test-the-project/image.jpg=). When you use Hugo's server to build your site, the image should get pulled in appropriately.
+
+** 3. Decide which archetype your content fits in, and then publish it with categories and tags
+
+Let's say the file we've been working with, =test-the-project.org=, should probably end up as a static page. Then we want to use the =npage= publishing script to publish the draft.
+
+This project supports adding categories and tags as command line options. One of the neat things about [[https://ox-hugo.scripter.co/][ox-hugo]] is its support for automatic generation of front-matter using a single-Org-file workflow. However, I decided for various reasons to use a one-page-per-file workflow:
+
+- I commonly want to add multiple tags and categories to content, which doesn't fit the binary categorization of subtrees very well (i.e., front-matter inheritance doesn't work for my habits with metadata).
+- A single file workflow makes in-file searching easier and more efficient.
+- A single file workflow leads to smaller files and better performance within Emacs, especially when things get long.
+- A single file workflow makes quickly glancing at a file's contents with =less= or the ranger file manager easier.
+- A single file workflow makes it easier to find a particular post or page to update or change its metadata, since each file can be opened straight from one's file manager or command line with no in-file searching necessary.
+- A single file workflow makes it easier to operate on posts or pages programmatically with command line utilities.
+- Etc.
+
+With all this being said, I didn't want to have to type out the front-matter boilerplate for all my files. So I built "mostly" automatic front-matter generation into the scripts.
+
+Continuing on in our example, let's say =test-the-project.org= had the following categories and tags:
+
+- Categories: Computers/Software
+- Tags: workflow, Org mode, automation
+
+You could then publish your file all in one step:
+
+#+BEGIN_SRC bash
+npage test-the-project -c "Computers/Software" -t "workflow" "Org mode" "automation"
+#+END_SRC
+
+*** A brief description of postconditions
+
+Aside from generating metadata for =test-the-site.org= and moving it from =~/sites/mysite.com/org/drafts/= to =~/sites/mysite.com/org/pages/=, the publishing script also moves the draft's static content from =~/sites/mysite.com/static/drafts/test-the-project/= to =~/sites/mysite.com/static/pages/test-the-project/=, and updates links to static content in the page to correspond to the new location. Finally, the publishing script invokes ox-hugo's export to generate Markdown as soon as the page is created (to be able to immediately see the page if Hugo's testing server is running), and also opens the newly minted page in Emacs to look it over and enable easy editing if you find typos as you make a final once-over of the page before you push remote to publish the page on the web (via Netlify or whatever else).
+
+* Windows version vs. Unix-like version
+
+Currently, these scripts are being used by me on Windows 10 (through the Windows Subsystem for Linux). So calling binaries takes the form of =hugo.exe= and =emacsclientw.exe= rather than extensionless calls like =hugo= and =emacsclient=.
+
+I figured other people might want to use this project on Unix-like systems, so I copied the scripts into another directory and modified them to use the appropriate calls:
+
+#+BEGIN_SRC bash
+sed -i "s/hugo.exe/hugo/g" ndraft npost
+sed -i "s/emacsclientw.exe/emacsclient/g" ndraft npost
+#+END_SRC
+
+I have not tested the Unix-like version of this project, but see no reason why it should not work. If I get around to setting up Emacs and Hugo on a virtual machine, I will report back. In the meantime, if someone else tests the scripts and they work, you could also let me know (and if they don't, open an issue).
+
+* Using this project as a dotfiles submodule
 
 If you have a dotfiles repository, you might consider using this project as a submodule. This is what I do with [[https://github.com/StevenTammen/dotfiles][my dotfiles]]. Submodules are a bit complicated, and I recommend reading [[https://chrisjean.com/git-submodules-adding-using-removing-and-updating/][this tutorial]] if you've never used them or are a bit rusty.
 
 Here's what this looked like for me:
 
-BEGIN_SRC bash
+#+BEGIN_SRC bash
 git submodule add git@github.com:StevenTammen/ox-hugo-publish.git ox-hugo-publish
 chmod -R 755 ox-hugo-publish/
-END_SRC
+#+END_SRC
 
 You'll want to give the shell scripts execute permissions. You'll also want to add the executables to your path in your shell configuration file (e.g., .bashrc, init.fish, etc.).

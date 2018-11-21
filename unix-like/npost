@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # generate Org file from Hugo archetype
-hugo.exe new posts/$1.org
+hugo new posts/$1.org
 
 
 # handle nested sections
@@ -65,7 +65,7 @@ if [ -d "static/drafts/$fname/" ]; then
   staticpath="static/posts/$path/"
   mkdir -p "$staticpath"
   mv static/drafts/$fname/ static/posts/$1/
-  sed -i "s|static/drafts/$fname|static/posts/$1|g" org/drafts/$fname.org
+  sed -i "s|/drafts/$fname|/posts/$1|g" org/drafts/$fname.org
 fi
 
 
@@ -75,8 +75,8 @@ rm content/posts/$1.org org/drafts/$fname.org content/drafts/$fname.md
 
 
 # export to markdown after creation to allow for immediate previewing on http://localhost:1313/
-emacsclientw.exe -e "(progn (find-file \"org/posts/$1.org\") (org-hugo-export-to-md) (kill-buffer))"
+emacsclient -e "(progn (find-file \"org/posts/$1.org\") (org-hugo-export-to-md) (kill-buffer))"
 
 
 # automatically open in Emacs to start proofreading before publication
-emacsclientw.exe org/posts/$1.org &
+emacsclient org/posts/$1.org &
